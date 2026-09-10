@@ -58,7 +58,7 @@
                     <div class="flex justify-between items-start mb-1">
                         <p class="font-medium text-slate-800">{{ $product->name }}</p>
                         
-                        @if($product->stock <= 5)
+                        @if($product->stock <= 10)
                             <span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
                                 Stok Menipis
                             </span>
