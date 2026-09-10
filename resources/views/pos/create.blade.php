@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="text-lg font-semibold mb-4">Transaksi Kasir</h1>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-3 gap-10">
         @foreach ($products as $product)
             <div class="border rounded-md p-3">
                 <p class="font-medium">{{ $product->name }}</p>
