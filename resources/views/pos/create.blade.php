@@ -8,6 +8,7 @@
 
     <div x-data="{
         cart: [],
+        selectedProduct: null,
         
         addToCart(id, name, price, stock) {
             let item = this.cart.find(i => i.id === id);
@@ -53,7 +54,8 @@
         <div class="grid grid-cols-3 gap-4 mb-6">
             @foreach($products as $product)
                 <div class="border rounded-md p-3 cursor-pointer hover:bg-slate-50 transition select-none shadow-sm"
-                     x-on:click="addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ $product->price }}, {{ $product->stock }})">
+                    :class="selectedProduct === {{ $product->id }} ? 'ring-2 ring-blue-500' : ''"
+                    x-on:click="selectedProduct = {{ $product->id }}; addToCart({{ $product->id }}, '{{ addslashes($product->name) }}', {{ $product->price }}, {{ $product->stock }})">
                     
                     <div class="flex justify-between items-start mb-1">
                         <p class="font-medium text-slate-800">{{ $product->name }}</p>
