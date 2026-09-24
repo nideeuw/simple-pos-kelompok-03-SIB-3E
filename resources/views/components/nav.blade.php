@@ -4,8 +4,14 @@
         class="{{ request()->routeIs('pos.create') ? 'text-blue-400 font-semibold' : 'hover:underline' }}">
             Kasir
         </a>
+
         <a href="{{ route('transactions.index') }}"
         class="{{ request()->routeIs('transactions.index') ? 'text-blue-400 font-semibold' : 'hover:underline' }}">
             Transaksi
         </a>
+        
+        <a href="{{ route('products.index') }}" class="hover:underline">
+            Produk
+        </a>
+
 </nav>
