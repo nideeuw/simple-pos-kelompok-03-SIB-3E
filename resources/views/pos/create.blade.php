@@ -72,6 +72,10 @@
             @endforeach
         </div>
 
+        <div class="mt-4">
+            {{ $products->links() }}
+        </div>
+
         <div class="border-t pt-4">
             <h2 class="text-base font-semibold mb-3">Item Keranjang</h2>
 
