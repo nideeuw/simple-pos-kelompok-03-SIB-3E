@@ -26,6 +26,15 @@ class DemoUserSeeder extends Seeder
                 'password' => 'password',
             ],
         );
+
+        User::firstOrCreate(
+            ['email' => 'manager@pos.test'],
+            [
+                'name' => 'Manager POS',
+                'role' => 'manager',
+                'password' => 'password',
+                'is_active' => true,
+            ],
+        );
     }
 }
-
