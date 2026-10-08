@@ -16,5 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // 403 ditampilkan memakai view resources/views/errors/403.blade.php
+        // (otomatis dipakai Laravel untuk HttpException berstatus 403).
     })->create();
