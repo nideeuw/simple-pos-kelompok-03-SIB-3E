@@ -23,7 +23,7 @@ class LoginController extends Controller
         ]);
 
         if (! Auth::attempt($credentials)) {
-            return back()->withErrors([
+            return redirect()->route('login')->withErrors([
                 'email' => 'Email atau kata sandi salah.',
             ])->onlyInput('email');
         }
@@ -31,7 +31,7 @@ class LoginController extends Controller
         if (! Auth::user()->is_active) {
             Auth::logout();
 
-            return back()->withErrors([
+            return redirect()->route('login')->withErrors([
                 'email' => 'Akun dinonaktifkan. Hubungi admin.',
             ])->onlyInput('email');
         }
