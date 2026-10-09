@@ -81,3 +81,78 @@ Tidak cukup.
 - Di Simple POS ini sudah dilakukan di `TransactionController::store()`. Form hanya mengirim `product_id` dan `qty`.
 
 **Kesimpulan:** data dari klien tidak bisa dipercaya, jadi nilai penting seperti total harus dihitung di server.
+
+---
+
+## Jawaban untuk Langkah 11 Tugas No 4 pada Jobsheet 7
+
+### Skenario Uji Manual: Autentikasi dan Otorisasi (RBAC)
+
+Persiapan:
+
+```bash
+php artisan migrate:fresh --seed
+php artisan serve
+npm run dev   # di terminal kedua
+```
+
+Akun demo (kata sandi semuanya `password`):
+
+| Peran   | Email            |
+|---------|------------------|
+| admin   | admin@pos.test   |
+| kasir   | kasir@pos.test   |
+| manager | manager@pos.test |
+
+### Skenario 1: Peran admin
+
+| Langkah | Hasil yang diharapkan |
+|---------|-----------------------|
+| 1. Buka `/login`, masuk sebagai `admin@pos.test` | Diarahkan ke `/pos` |
+| 2. Lihat navigasi | Menu Kasir, Transaksi, Produk, Kategori, nama dan peran "admin", serta tombol Keluar |
+| 3. Buka `/products` | Daftar produk tampil |
+| 4. Buka `/transactions` | Daftar transaksi tampil |
+| 5. Klik Keluar | Diarahkan ke `/login` |
+
+### Skenario 2: Peran kasir
+
+| Langkah | Hasil yang diharapkan |
+|---------|-----------------------|
+| 1. Masuk sebagai `kasir@pos.test` | Diarahkan ke `/pos` |
+| 2. Lihat navigasi | Hanya Kasir dan Transaksi, tanpa Produk dan Kategori, ada tombol Keluar |
+| 3. Buka `/pos` dan `/transactions` | Keduanya tampil normal |
+| 4. Buka `/products` lewat address bar | Halaman 403 |
+| 5. Buka `/categories` lewat address bar | Halaman 403 |
+
+### Skenario 3: Peran manager
+
+| Langkah | Hasil yang diharapkan |
+|---------|-----------------------|
+| 1. Masuk sebagai `manager@pos.test` | Diarahkan ke `/pos` |
+| 2. Lihat navigasi | Hanya Kasir dan Transaksi, nama dan peran "manager" |
+| 3. Buka `/transactions` | Daftar transaksi tampil |
+| 4. Buka `/products` | Halaman 403 |
+| 5. Buka `/categories` | Halaman 403 |
+
+### Skenario 4: Tamu (belum login)
+
+| Langkah | Hasil yang diharapkan |
+|---------|-----------------------|
+| 1. Buka `/products` atau `/pos` | Diarahkan ke `/login` |
+| 2. Buka `/info` | Halaman informasi tampil |
+| 3. Masuk dengan kata sandi salah | Pesan "Email atau kata sandi salah." |
+| 4. Jalankan `curl.exe -i http://127.0.0.1:8000/pos -H "Accept: application/json"` | Status 401, isi `{"message":"Unauthenticated."}` |
+| 5. Masuk sebagai `kasir@pos.test` | Diarahkan ke `/pos` |
+| 6. Masih login, buka `/info` lalu `/login` | Keduanya langsung diarahkan ke `/pos` |
+
+### Skenario 5: Akun dinonaktifkan
+
+| Langkah | Hasil yang diharapkan |
+|---------|-----------------------|
+| 1. Di `php artisan tinker`: `App\Models\User::where('email', 'kasir@pos.test')->update(['is_active' => false]);` | Keluar angka `1` |
+| 2. Masuk sebagai `kasir@pos.test` | Pesan "Akun dinonaktifkan. Hubungi admin." |
+| 3. Aktifkan lagi: `App\Models\User::where('email', 'kasir@pos.test')->update(['is_active' => true]);` lalu masuk | Berhasil masuk ke `/pos` |
+
+### Catatan
+
+Halaman `/categories` untuk admin belum memiliki tampilan (view `categories` belum pernah dibuat sejak pertemuan sebelumnya), sehingga tidak dimasukkan sebagai skenario "tampil". Pembatasan aksesnya tetap berlaku: kasir dan manager yang membuka `/categories` mendapat 403.
