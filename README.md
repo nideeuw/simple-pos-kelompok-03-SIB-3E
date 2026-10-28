@@ -156,3 +156,13 @@ Akun demo (kata sandi semuanya `password`):
 ### Catatan
 
 Halaman `/categories` untuk admin belum memiliki tampilan (view `categories` belum pernah dibuat sejak pertemuan sebelumnya), sehingga tidak dimasukkan sebagai skenario "tampil". Pembatasan aksesnya tetap berlaku: kasir dan manager yang membuka `/categories` mendapat 403.
+
+## Jawaban untuk Langkah 6 jobsheet 9
+
+Kelompok kami memilih untuk menyediakan ketiganya karena masing-masing punya fungsi yang pas sesuai kebutuhan:
+
+* CSV: Paling oke buat mengekspor semua 100.000 baris data mentah. Prosesnya sangat cepat, enteng di memori server, dan gampang kalau mau di-impor ke sistem lain.
+
+* Excel: Pas banget kalau penggunanya butuh mengotak-atik data secara mandiri, seperti melakukan filter atau bikin pivot table. Risikonya, ukuran file memang lebih besar dan agak berat saat dibuka.
+
+* PDF: Khusus dipakai untuk mengekspor rekap atau ringkasannya saja yang sudah final dan siap cetak. Kita tidak akan memasukkan 100.000 baris detail ke PDF agar server tidak down dan halamannya tidak sampai ribuan.
