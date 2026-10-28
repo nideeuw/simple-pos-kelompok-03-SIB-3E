@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SalesReportExport; //export excel
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel; //export excel
+use Symfony\Component\HttpFoundation\BinaryFileResponse; //export excel
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
@@ -58,5 +61,14 @@ class ReportController extends Controller
     {
         return Transaction::with('user')
             ->whereBetween('created_at', [$from, $to]);
+    }
+
+    public function exportExcel(Request $request): BinaryFileResponse
+{
+    [$from, $to] = $this->resolveDateRange($request);
+        return Excel::download(
+            new SalesReportExport($this->filteredQuery($from, $to)),
+            'laporan-penjualan.xlsx',
+        );
     }
 }
