@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
             ->name('reports.index');
         Route::get('/reports/export/csv', [ReportController::class, 'exportCsv'])
             ->name('reports.export.csv');
+        Route::get('/reports/export/xlsx', [ReportController::class, 'exportExcel'])
+            ->name('reports.export.xlsx');
     });
 });
-
-Route::get('/reports/export/xlsx', [ReportController::class, 'exportExcel'])->name('reports.export.xlsx');
