@@ -24,12 +24,22 @@
     <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded-md text-sm">Import</button>
 </form>
 
+<h2 class="text-base font-semibold mt-8 mb-2">Import versi Laravel Excel</h2>
+<form method="POST" action="{{ route('import.excel.store') }}" enctype="multipart/form-data" class="max-w-md mb-6">
+    @csrf
+    <label class="block mb-3">
+        <span class="text-sm font-medium">File CSV</span>
+        <input type="file" name="csv" accept=".csv" class="mt-1 block w-full text-sm">
+    </label>
+    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm">Import (Laravel Excel)</button>
+</form>
+
 @if(isset($importErrors) && $importErrors->isNotEmpty())
 <div class="bg-red-50 border border-red-200 rounded-md p-4 max-w-xl">
     <h2 class="text-sm font-semibold text-red-700 mb-2">Error pada Import Terakhir:</h2>
     <ul class="list-disc list-inside text-sm text-red-600 space-y-1">
         @foreach($importErrors as $error)
-            <li>Baris {{ $error->row_number }}: {{ $error->error_message }}</li>
+        <li>Baris {{ $error->row_number }}: {{ $error->error_message }}</li>
         @endforeach
     </ul>
 </div>
