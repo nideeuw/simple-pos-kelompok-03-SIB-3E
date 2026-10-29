@@ -157,6 +157,8 @@ Akun demo (kata sandi semuanya `password`):
 
 Halaman `/categories` untuk admin belum memiliki tampilan (view `categories` belum pernah dibuat sejak pertemuan sebelumnya), sehingga tidak dimasukkan sebagai skenario "tampil". Pembatasan aksesnya tetap berlaku: kasir dan manager yang membuka `/categories` mendapat 403.
 
+---
+
 ## Jawaban untuk Langkah 6 jobsheet 9
 
 Kelompok kami memilih untuk menyediakan ketiganya karena masing-masing punya fungsi yang pas sesuai kebutuhan:
@@ -166,3 +168,19 @@ Kelompok kami memilih untuk menyediakan ketiganya karena masing-masing punya fun
 * Excel: Pas banget kalau penggunanya butuh mengotak-atik data secara mandiri, seperti melakukan filter atau bikin pivot table. Risikonya, ukuran file memang lebih besar dan agak berat saat dibuka.
 
 * PDF: Khusus dipakai untuk mengekspor rekap atau ringkasannya saja yang sudah final dan siap cetak. Kita tidak akan memasukkan 100.000 baris detail ke PDF agar server tidak down dan halamannya tidak sampai ribuan.
+
+---
+
+## Jawaban untuk Langkah 10 Tugas No 5 pada Jobsheet 9
+
+### Proses yang layak dipindah ke queued job: Export Excel laporan penjualan
+
+**Proses:** `ReportController::exportExcel()` yang membuat file `.xlsx` dari data transaksi.
+
+**Alasan:**
+- Pembuatan file `.xlsx` berat. Saat diuji dengan 52.500 transaksi, request di browser memakan sekitar 6,9 menit sebelum file ter-download, sehingga pengguna terpaksa menunggu tanpa tahu prosesnya masih berjalan atau tidak.
+- Request web punya batas waktu eksekusi PHP. Kalau data makin besar, request bisa gagal dengan error `Maximum execution time exceeded`.
+- Proses ini tidak perlu hasil seketika. Pengguna cukup diberi tahu bahwa laporan sedang dibuat, lalu file bisa diunduh setelah selesai.
+- Sama seperti import produk di Langkah 8, job bisa diberi `$tries`, `$backoff`, dan `$timeout`, sehingga kalau gagal bisa dicoba ulang dan tercatat di `failed_jobs`.
+
+**Cara kerja yang diusulkan:** controller hanya mengirim job dengan `dispatch()` dan langsung memberi respons ke pengguna. Worker (`queue:work`) membuat file Excel di background dan menyimpannya ke storage. Setelah selesai, pengguna mengunduh file dari halaman laporan.
