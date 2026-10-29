@@ -66,19 +66,39 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request): Response
     {
-        [$from, $to] = $this->resolveDateRange($request);
-        $categoryId = $request->input('category_id');
-        $query = $this->filteredQuery($from, $to, $categoryId);
+    [$from, $to] = $this->resolveDateRange($request);
+    $categoryId = $request->input('category_id');
+    $query = $this->filteredQuery($from, $to, $categoryId);
 
-        $pdf = Pdf::loadView('reports.pdf', [
-            'totalPenjualan' => $query->sum('total'),
-            'jumlahTransaksi' => $query->count(),
-            'transactions' => $this->filteredQuery($from, $to, $categoryId)->latest()->limit(50)->get(),
-            'from' => $from->toDateString(),
-            'to' => $to->toDateString(),
-        ]);
+    $produkTerlaris = \App\Models\TransactionDetail::query()
+        ->selectRaw('product_id, SUM(qty) as jumlah_terjual, SUM(subtotal) as total_penjualan')
+        ->whereHas('transaction', function (Builder $q) use ($from, $to, $categoryId) {
+            $q->whereBetween('created_at', [$from, $to])
+                ->when($categoryId, function (Builder $query, $categoryId) {
+                    $query->whereHas('details.product', function (Builder $subQuery) use ($categoryId) {
+                        $subQuery->where('category_id', $categoryId);
+                    });
+                });
+        })
+        ->with('product')
+        ->groupBy('product_id')
+        ->orderByDesc('jumlah_terjual')
+        ->limit(10)
+        ->get();
 
-        return $pdf->download('laporan-penjualan.pdf');
+    $pdf = Pdf::loadView('reports.pdf', [
+        'totalPenjualan' => $query->sum('total'),
+        'jumlahTransaksi' => $query->count(),
+        'transactions' => $this->filteredQuery($from, $to, $categoryId)
+            ->latest()
+            ->limit(50)
+            ->get(),
+        'produkTerlaris' => $produkTerlaris,
+        'from' => $from->toDateString(),
+        'to' => $to->toDateString(),
+    ]);
+
+    return $pdf->download('laporan-penjualan.pdf');
     }
 
     public function importForm(): View
