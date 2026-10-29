@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Product;
+use App\Models\ImportError;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
@@ -24,8 +25,18 @@ class ProcessProductImport implements ShouldQueue
         $rows = array_map('str_getcsv', $lines);
         $header = array_shift($rows);
 
+        ImportError::truncate();
+
+        $rowNumber = 1;
+
         foreach ($rows as $row) {
+            $rowNumber++;
+
             if (count($row) !== count($header)) {
+                ImportError::create([
+                    'row_number' => $rowNumber,
+                    'error_message' => 'Jumlah column tidak sesuai dengan header CSV.'
+                ]);
                 continue;
             }
 
@@ -36,14 +47,18 @@ class ProcessProductImport implements ShouldQueue
             ]);
 
             if ($validator->fails()) {
+                ImportError::create([
+                    'row_number' => $rowNumber,
+                    'error_message' => implode(', ', $validator->errors()->all())
+                ]);
                 continue;
             }
 
             $data = $validator->validated();
-
+            
             Product::updateOrCreate(
                 ['name' => $data['name'], 'category_id' => $data['category_id']],
-                ['price' => $data['price']],
+                ['price' => $data['price']]
             );
         }
 
