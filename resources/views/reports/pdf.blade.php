@@ -38,5 +38,33 @@
             @endforeach
         </tbody>
     </table>
+        <h2 style="font-size: 16px; margin-top: 24px;">
+        10 Produk Terlaris
+    </h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Nama Produk</th>
+                <th class="right">Jumlah Terjual</th>
+                <th class="right">Total Penjualan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($produkTerlaris as $produk)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $produk->product?->name ?? 'Produk tidak tersedia' }}</td>
+                    <td class="right">{{ number_format($produk->jumlah_terjual) }}</td>
+                    <td class="right">Rp {{ number_format($produk->total_penjualan) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4">Tidak ada data produk pada periode ini.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 </body>
 </html>
