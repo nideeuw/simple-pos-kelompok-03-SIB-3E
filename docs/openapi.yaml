@@ -1,0 +1,144 @@
+openapi: 3.0.0
+info:
+  title: Simple POS API
+  version: 1.0.0
+  description: Dokumentasi API untuk aplikasi Simple POS.
+
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development server
+
+paths:
+  /api/login:
+    post:
+      summary: Login pengguna
+      description: Login untuk mendapatkan token autentikasi.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: kasir@pos.test
+                password:
+                  type: string
+                  example: password
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 1|your-access-token
+        '401':
+          description: Email atau password salah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid credentials
+
+  /api/products:
+    get:
+      summary: Mendapatkan daftar produk
+      description: Mengambil daftar produk yang tersedia.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mengambil daftar produk
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: Flat Monitor
+                        price:
+                          type: integer
+                          example: 500000
+                        category:
+                          type: string
+                          example: Electronics
+        '401':
+          description: Token tidak tersedia atau tidak valid
+
+  /api/transactions:
+    post:
+      summary: Membuat transaksi
+      description: Menyimpan transaksi baru berdasarkan produk yang dipilih.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - product_id
+                      - qty
+                    properties:
+                      product_id:
+                        type: integer
+                        example: 1
+                      qty:
+                        type: integer
+                        example: 2
+      responses:
+        '201':
+          description: Transaksi berhasil dibuat
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 2501
+                      total:
+                        type: integer
+                        example: 1000000
+        '401':
+          description: Token tidak tersedia atau tidak valid
+        '422':
+          description: Data transaksi tidak valid
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
