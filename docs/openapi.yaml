@@ -2,111 +2,82 @@ openapi: 3.0.0
 info:
   title: Simple POS API
   version: 1.0.0
-  description: Dokumentasi API untuk aplikasi Simple POS.
-
-servers:
-  - url: http://127.0.0.1:8000
-    description: Local development server
-
 paths:
-  /api/login:
+  /api/v1/login:
     post:
-      summary: Login pengguna
-      description: Login untuk mendapatkan token autentikasi.
+      summary: Login dan dapatkan token
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - email
-                - password
               properties:
-                email:
-                  type: string
-                  example: kasir@pos.test
-                password:
-                  type: string
-                  example: password
+                email: { type: string }
+                password: { type: string }
       responses:
         '200':
-          description: Login berhasil
+          description: Token berhasil diterbitkan
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  token:
-                    type: string
-                    example: 1|your-access-token
+                  token: { type: string }
         '401':
-          description: Email atau password salah
+          description: Kredensial tidak valid
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                    example: Invalid credentials
-
-  /api/products:
+                  message: { type: string }
+  /api/v1/products:
     get:
-      summary: Mendapatkan daftar produk
-      description: Mengambil daftar produk yang tersedia dengan dukungan paginasi, filter, dan pencarian.
+      summary: Ambil daftar produk (paginasi, filter, sort)
       security:
         - bearerAuth: []
       parameters:
-        - name: page
+        - name: category_id
           in: query
-          description: Nomor halaman untuk paginasi data
+          description: Filter berdasarkan id kategori
           required: false
           schema:
             type: integer
-            default: 1
-            example: 1
+        - name: q
+          in: query
+          description: Cari nama produk (minimal 2 karakter)
+          required: false
+          schema:
+            type: string
+            minLength: 2
+        - name: sort
+          in: query
+          description: Urutan hasil, awalan minus berarti menurun
+          required: false
+          schema:
+            type: string
+            enum: [name, -name, price, -price]
+            default: name
         - name: per_page
           in: query
-          description: Jumlah item per halaman (minimal 1, maksimal 100)
+          description: Jumlah produk per halaman
           required: false
           schema:
             type: integer
             minimum: 1
             maximum: 100
             default: 15
-            example: 15
-        - name: q
+        - name: page
           in: query
-          description: Kata kunci pencarian berdasarkan nama produk
-          required: false
-          schema:
-            type: string
-            minLength: 2
-            example: Kopi
-        - name: category_id
-          in: query
-          description: Filter produk berdasarkan ID kategori
+          description: Nomor halaman
           required: false
           schema:
             type: integer
-            example: 1
-        - name: sort
-          in: query
-          description: Pengurutan data (contoh name, -name, price, -price)
-          required: false
-          schema:
-            type: string
-            enum:
-              - name
-              - -name
-              - price
-              - -price
-            default: name
-            example: name
+            minimum: 1
+            default: 1
       responses:
         '200':
-          description: Berhasil mengambil daftar produk
+          description: Daftar produk berpaginasi
           content:
             application/json:
               schema:
@@ -117,93 +88,61 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
-                          type: integer
-                          example: 1
-                        name:
-                          type: string
-                          example: Flat Monitor
-                        price:
-                          type: integer
-                          example: 500000
-                        category:
-                          type: string
-                          example: Electronics
+                        id: { type: integer }
+                        name: { type: string }
+                        price: { type: integer }
+                        category: { type: string }
                   links:
                     type: object
                     properties:
-                      first:
-                        type: string
-                        example: http://127.0.0.1:8000/api/products?page=1
-                      last:
-                        type: string
-                        example: http://127.0.0.1:8000/api/products?page=10
-                      prev:
-                        type: string
-                        nullable: true
-                        example: null
-                      next:
-                        type: string
-                        nullable: true
-                        example: http://127.0.0.1:8000/api/products?page=2
+                      first: { type: string, nullable: true }
+                      last: { type: string, nullable: true }
+                      prev: { type: string, nullable: true }
+                      next: { type: string, nullable: true }
                   meta:
                     type: object
                     properties:
-                      current_page:
-                        type: integer
-                        example: 1
-                      from:
-                        type: integer
-                        example: 1
-                      last_page:
-                        type: integer
-                        example: 10
-                      per_page:
-                        type: integer
-                        example: 15
-                      to:
-                        type: integer
-                        example: 15
-                      total:
-                        type: integer
-                        example: 150
+                      current_page: { type: integer }
+                      from: { type: integer, nullable: true }
+                      last_page: { type: integer }
+                      links:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            url: { type: string, nullable: true }
+                            label: { type: string }
+                            page: { type: integer, nullable: true }
+                            active: { type: boolean }
+                      path: { type: string }
+                      per_page: { type: integer }
+                      to: { type: integer, nullable: true }
+                      total: { type: integer }
         '401':
-          description: Token tidak tersedia atau tidak valid
+          description: Token tidak ada atau tidak valid
         '422':
-          description: Validasi parameter query gagal (misal per_page melebihi batas atau sort tidak valid)
-
-  /api/transactions:
+          description: Parameter query tidak valid, misalnya per_page lebih dari 100
+  /api/v1/transactions:
     post:
-      summary: Membuat transaksi
-      description: Menyimpan transaksi baru berdasarkan produk yang dipilih.
+      summary: Buat transaksi baru
       security:
         - bearerAuth: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - items
               properties:
                 items:
                   type: array
                   items:
                     type: object
-                    required:
-                      - product_id
-                      - qty
                     properties:
-                      product_id:
-                        type: integer
-                        example: 1
-                      qty:
-                        type: integer
-                        example: 2
+                      product_id: { type: integer }
+                      qty: { type: integer }
       responses:
         '201':
-          description: Transaksi berhasil dibuat
+          description: Transaksi berhasil disimpan
           content:
             application/json:
               schema:
@@ -212,20 +151,14 @@ paths:
                   data:
                     type: object
                     properties:
-                      id:
-                        type: integer
-                        example: 2501
-                      total:
-                        type: integer
-                        example: 1000000
+                      id: { type: integer }
+                      total: { type: integer }
         '401':
-          description: Token tidak tersedia atau tidak valid
+          description: Token tidak ada atau tidak valid
         '422':
-          description: Data transaksi tidak valid
-
+          description: Input tidak valid, misalnya product_id tidak ditemukan
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: token
