@@ -15,7 +15,7 @@ paths:
                 email: { type: string }
                 password: { type: string }
       responses:
-        '200':
+        "200":
           description: Token berhasil diterbitkan
           content:
             application/json:
@@ -23,7 +23,7 @@ paths:
                 type: object
                 properties:
                   token: { type: string }
-        '401':
+        "401":
           description: Kredensial tidak valid
           content:
             application/json:
@@ -76,7 +76,7 @@ paths:
             minimum: 1
             default: 1
       responses:
-        '200':
+        "200":
           description: Daftar produk berpaginasi
           content:
             application/json:
@@ -118,9 +118,9 @@ paths:
                       per_page: { type: integer }
                       to: { type: integer, nullable: true }
                       total: { type: integer }
-        '401':
+        "401":
           description: Token tidak ada atau tidak valid
-        '422':
+        "422":
           description: Parameter query tidak valid, misalnya per_page lebih dari 100
   /api/v1/transactions:
     post:
@@ -141,7 +141,7 @@ paths:
                       product_id: { type: integer }
                       qty: { type: integer }
       responses:
-        '201':
+        "201":
           description: Transaksi berhasil disimpan
           content:
             application/json:
@@ -153,12 +153,20 @@ paths:
                     properties:
                       id: { type: integer }
                       total: { type: integer }
-        '401':
+        "401":
           description: Token tidak ada atau tidak valid
-        '422':
+        "422":
           description: Input tidak valid, misalnya product_id tidak ditemukan
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+
+# Pengalaman menggunakan Postman jauh lebih praktis dan intuitif dibandingkan
+# menggunakan curl di terminal PowerShell. Antarmuka GUI membuat manajemen Bearer Token
+# dan custom header (seperti Idempotency-Key dan Accept) menjadi terpusat. Keuntungan
+# terbesarnya ada pada penulisan payload data: kita bisa menulis format JSON murni
+# tanpa berurusan dengan kerumitan aturan escape character (\) yang sering memicu error syntax.
+# Selain itu, hasil respons JSON dari server otomatis diformat dengan warna dan indentasi,
+# sehingga jauh lebih mudah dibaca dibandingkan teks terminal yang rata.
